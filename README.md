@@ -47,15 +47,20 @@ Ou manuellement :
 pip install mailaka
 ```
 
-### Via npm / pnpm
+### Via npm / pnpm (depuis GitHub)
 
 ```bash
 # Avec npm
-npm install -g mailaka
+npm install -g Mihaja29/mailaka
 
 # Avec pnpm (plus rapide, moins d'espace disque)
-pnpm install -g mailaka
+pnpm install -g Mihaja29/mailaka
+
+# Ou avec npx (sans installation globale)
+npx Mihaja29/mailaka
 ```
+
+**Note:** Le paquet n'est pas encore publié sur npm registry. L'installation se fait directement depuis GitHub.
 
 ### Via Git
 
