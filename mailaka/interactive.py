@@ -7,14 +7,19 @@ import click
 
 from mailaka import __version__
 from mailaka.core import InboxStorage, ProviderFactory, ProviderError
-from mailaka.utils import (
+from mailaka.utils.display import (
     echo,
     echo_separator,
+    echo_separator_close,
     styled,
     BANNER,
     FG_GREY_PEARL,
     FG_RED_FLUO,
     FG_BLUE_NIGHT,
+    COLORS,
+    echo_card_header,
+    echo_card_line,
+    echo_card_kv,
 )
 
 
@@ -128,54 +133,51 @@ def echo_cross(text):
 
 
 def start_interactive_mode():
-    """Start the interactive CLI mode."""
+    """Start the interactive CLI mode with Anthropic-style UI."""
     click.clear()
     click.echo(BANNER)
-    echo_separator()
-
-    version_label = f"v{styled(__version__, fg=FG_BLUE_NIGHT)}"
-    echo(f"  {version_label} — Recevez et lisez vos messages directement dans le terminal", bold=True)
-    echo_separator()
+    
+    # Version panel
+    echo_card_header(f"Mailaka v{__version__}", width=60)
+    echo_card_line("Generateur d'emails ephemeres", width=60)
+    echo_card_line("Protection de votre vie privee", width=60, fg=COLORS['fg_dim'])
+    echo_separator_close(width=60)
     click.echo()
-
-    # Affichage des commandes disponibles
-    echo("  Commandes disponibles:", bold=True)
+    
+    # Command panel
+    echo_card_header("Commandes", width=60)
+    echo_card_line("new           Creer adresse(s)", width=60)
+    echo_card_line("inbox         Voir messages", width=60)
+    echo_card_line("read          Lire message", width=60)
+    echo_card_line("delete        Supprimer", width=60)
+    echo_card_line("attachments   Voir pieces jointes", width=60)
+    echo_card_line("inboxes       Lister inboxes", width=60)
+    echo_card_line("status        Statut actif", width=60)
+    echo_card_line("export/import JSON portabilite", width=60)
+    echo_card_line("clear         Effacer ecran", width=60)
+    echo_card_line("exit          Quitter", width=60)
+    echo_separator_close(width=60)
     click.echo()
-    echo(f"    {styled('new', fg=FG_RED_FLUO, bold=True)}           Créer adresse(s) (syntaxe: 1,3 ou 2-4)")
-    echo(f"    {styled('inbox', fg=FG_RED_FLUO, bold=True)}          Voir les messages reçus")
-    echo(f"    {styled('read', fg=FG_RED_FLUO, bold=True)}            Lire un message")
-    echo(f"    {styled('delete', fg=FG_RED_FLUO, bold=True)}          Supprimer plusieurs (messages ou emails)")
-    echo(f"    {styled('attachments', fg=FG_RED_FLUO, bold=True)}     Voir + télécharger pièces jointes")
-    echo(f"    {styled('download', fg=FG_RED_FLUO, bold=True)}        Télécharger les pièces jointes")
-    echo(f"    {styled('status', fg=FG_RED_FLUO, bold=True)}          Voir le statut actuel")
-    echo(f"    {styled('inboxes', fg=FG_RED_FLUO, bold=True)}         Lister toutes les inboxes")
-    echo(f"    {styled('clear', fg=FG_RED_FLUO, bold=True)}          Effacer l'écran")
-    echo(f"    {styled('help', fg=FG_RED_FLUO, bold=True)}           Afficher l'aide")
-    echo(f"    {styled('exit/quit/q', fg=FG_RED_FLUO, bold=True)}    Quitter")
-    click.echo()
-    echo("  Commande inconnue = quitte Mailaka", fg=FG_GREY_PEARL)
-    click.echo()
-    echo_separator()
-    click.echo()
-
+    
+    # Status panel
     storage = InboxStorage()
     active_inbox = storage.get_latest()
     inboxes = storage.load()
-
+    
     if active_inbox:
-        echo(
-            f"  Adresse active: {styled(active_inbox.address, fg=FG_RED_FLUO, bold=True)}"
-        )
-        echo(f"  Provider: {active_inbox.provider}", fg=FG_GREY_PEARL)
-        echo(f"  Inboxes: {len(inboxes)}/5", fg=FG_GREY_PEARL)
+        echo_card_header("Statut", width=60)
+        echo_card_kv("Adresse", active_inbox.address[:45], width=60, key_width=12)
+        echo_card_kv("Provider", active_inbox.provider, width=60, key_width=12)
+        echo_card_kv("Inboxes", f"{len(inboxes)}/5", width=60, key_width=12)
+        echo_separator_close(width=60)
     else:
-        echo("  Aucune adresse active", fg=FG_GREY_PEARL)
-        echo("  Tapez 'new' pour créer une adresse", fg=FG_GREY_PEARL)
-
+        echo_card_header("Statut", width=60)
+        echo_card_line("Aucune adresse active", width=60, fg=COLORS['fg_dim'])
+        echo_card_line("Tapez 'new' pour creer", width=60, fg=COLORS['fg_dim'])
+        echo_separator_close(width=60)
+    
     click.echo()
-    echo_separator()
-    click.echo()
-
+    
     while True:
         try:
             user_input = click.prompt(
@@ -194,15 +196,14 @@ def start_interactive_mode():
             args = parts[1:] if len(parts) > 1 else []
 
             if command in ["exit", "quit", "q"]:
-                click.echo()
-                echo("  Au revoir!", fg=FG_BLUE_NIGHT, bold=True)
+                click.echo(COLORS['border'])
+                click.echo(styled(f"  Au revoir!", fg=COLORS['accent'], bold=True))
                 click.echo()
                 break
 
             elif command == "clear":
                 click.clear()
                 click.echo(BANNER)
-                echo_separator()
                 continue
 
             elif command == "help" or command == "h":
@@ -322,48 +323,24 @@ def start_interactive_mode():
 
 
 def show_help():
-    """Display help message."""
+    """Display help message with Anthropic-style cards."""
     click.echo()
-    echo("  Commandes disponibles:", bold=True)
-    click.echo()
-    click.echo(
-        f"    {styled('new', fg=FG_RED_FLUO, bold=True):<20} Créer adresse(s) [TEMP: 15min | LONG: 🔒 sécurisé]"
-    )
-    click.echo(
-        f"    {styled('delete', fg=FG_RED_FLUO, bold=True):<20} Supprimer multiples (messages: 1,2-4 ou inboxes: 1,3)"
-    )
-    click.echo(
-        f"    {styled('inbox', fg=FG_RED_FLUO, bold=True):<20} Voir les messages de l'adresse active"
-    )
-    click.echo(
-        f"    {styled('read', fg=FG_RED_FLUO, bold=True):<20} Lire un message (choix interactif)"
-    )
-    click.echo(
-        f"    {styled('delete', fg=FG_RED_FLUO, bold=True):<20} Supprimer multiples (messages: 1,2-4 ou inboxes: 1,3)"
-    )
-    click.echo(
-        f"    {styled('attachments', fg=FG_RED_FLUO, bold=True):<20} Voir ET télécharger toutes les pièces jointes"
-    )
-    click.echo(
-        f"    {styled('check', fg=FG_RED_FLUO, bold=True):<20} Vérifier email/domaine (disify)"
-    )
-    click.echo(
-        f"    {styled('download', fg=FG_RED_FLUO, bold=True):<20} Télécharger pièces jointes (choix interactif)"
-    )
-    click.echo(
-        f"    {styled('inboxes', fg=FG_RED_FLUO, bold=True):<20} Lister inboxes [⏳: temps restant | 🔒: long terme]"
-    )
-    click.echo(
-        f"    {styled('status', fg=FG_RED_FLUO, bold=True):<20} Afficher l'adresse active"
-    )
-    click.echo(
-        f"    {styled('version', fg=FG_RED_FLUO, bold=True):<20} Afficher la version"
-    )
-    click.echo(f"    {styled('clear', fg=FG_RED_FLUO, bold=True):<20} Effacer l'écran")
-    click.echo(
-        f"    {styled('help', fg=FG_RED_FLUO, bold=True):<20} Afficher cette aide"
-    )
-    click.echo(f"    {styled('exit', fg=FG_RED_FLUO, bold=True):<20} Quitter")
+    echo_card_header("Commandes disponibles", width=60)
+    echo_card_line("new           Creer adresse(s)", width=60)
+    echo_card_line("delete        Supprimer messages/inboxes", width=60)
+    echo_card_line("inbox         Voir messages actifs", width=60)
+    echo_card_line("read          Lire un message", width=60)
+    echo_card_line("attachments   Voir pieces jointes", width=60)
+    echo_card_line("download      Telecharger pieces jointes", width=60)
+    echo_card_line("inboxes       Lister toutes inboxes", width=60)
+    echo_card_line("status        Statut adresse active", width=60)
+    echo_card_line("check         Verifier email/domaine", width=60)
+    echo_card_line("export        Exporter vers JSON", width=60)
+    echo_card_line("import        Importer depuis JSON", width=60)
+    echo_card_line("version       Afficher version", width=60)
+    echo_card_line("clear         Effacer ecran", width=60)
+    echo_card_line("exit          Quitter", width=60)
+    echo_separator_close(width=60)
     click.echo()
 
 
