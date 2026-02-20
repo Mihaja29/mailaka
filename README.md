@@ -6,20 +6,6 @@
 ![Python](https://img.shields.io/badge/python-3.8%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-## 📸 Captures d'écran
-
-### Interface d'accueil
-![Welcome](./screenshots/01-welcome.png)
-
-### Création d'une adresse email
-![Create Email](./screenshots/02-create-email.png)
-
-### Consultation de la boîte de réception
-![Inbox](./screenshots/03-inbox.png)
-
-### Mode interactif
-![Interactive Mode](./screenshots/04-interactive.png)
-
 ## ✨ Fonctionnalités
 
 - Création rapide d'adresses email temporaires
