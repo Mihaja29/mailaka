@@ -51,17 +51,17 @@ def echo(text, fg=None, bold=False):
 
 def echo_separator(width=60):
     """Echo separator line (title bar only)."""
-    click.echo(styled(f"  {'─' * width}", fg=COLORS['border']))
+    click.echo(styled(f" {'─' * width}", fg=COLORS['border']))
 
 
 def echo_error(text):
     """Echo error message."""
-    click.echo(styled(f"  [✖] {text}", fg=COLORS['accent'], bold=True))
+    click.echo(styled(f" [✖] {text}", fg=COLORS['accent'], bold=True))
 
 
 def echo_success(text):
     """Echo success message."""
-    click.echo(styled(f"  [✔] {text}", fg=COLORS['success']))
+    click.echo(styled(f" [✔] {text}", fg=COLORS['success']))
 
 
 def _display_width(text):
@@ -74,28 +74,22 @@ def _display_width(text):
 
 def echo_card_header(title, width=60):
     """Display card header with title in RED."""
-    # Title styled in red
     styled_title = styled(title, fg=COLORS['accent'], bold=True)
-    
-    # Calculate padding
     title_width = len(title)
     total_padding = width - title_width
     left = total_padding // 2
     right = total_padding - left
-    
-    # Build line: left border + left padding + title + right padding + right border
-    border_left = styled("  ┌", fg=COLORS['border'])
+    border_left = styled(" ┌", fg=COLORS['border'])
     border_right = styled("┐", fg=COLORS['border'])
     padding_left = "─" * left
     padding_right = "─" * right
-    
     click.echo(f"{border_left}{padding_left} {styled_title} {padding_right}{border_right}")
 
 
 def echo_card_line(content, width=60, fg=None):
     """Display card content line without side borders."""
     fg = fg or COLORS['fg']
-    click.echo(styled(f"  {content}", fg=fg))
+    click.echo(styled(f" {content}", fg=fg))
 
 
 def echo_separator_close(width=60):
@@ -110,7 +104,7 @@ def echo_card_kv(key, value, width=60, key_width=15):
     remaining = width - key_width - 1
     if len(val_str) > remaining:
         val_str = val_str[:remaining-3] + "..."
-    click.echo(styled(f"  {key_str}{val_str}", fg=COLORS['fg']))
+    click.echo(styled(f" {key_str}{val_str}", fg=COLORS['fg']))
 
 
 def echo_section(title, width=60):
@@ -126,9 +120,9 @@ def echo_section_end(width=60):
 
 def echo_check(text):
     """Echo success with checkmark."""
-    click.echo(styled(f"  ✔ {text}", fg=COLORS['success']))
+    click.echo(styled(f" ✔ {text}", fg=COLORS['success']))
 
 
 def echo_cross(text):
     """Echo error with cross."""
-    click.echo(styled(f"  ✖ {text}", fg=COLORS['accent'], bold=True))
+    click.echo(styled(f" ✖ {text}", fg=COLORS['accent'], bold=True))
