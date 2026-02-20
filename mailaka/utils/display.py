@@ -51,6 +51,11 @@ def echo(text, fg=None, bold=False):
     click.echo(styled(text, fg=fg, bold=bold))
 
 
+def echo_separator(width=60):
+    """Echo top border of card."""
+    click.echo(styled(f"  ┌{'─' * width}┐", fg=COLORS['border']))
+
+
 def echo_error(text):
     """Echo error message."""
     click.echo(styled(f"  [✖] {text}", fg=COLORS['accent'], bold=True))
