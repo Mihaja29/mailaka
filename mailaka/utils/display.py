@@ -10,6 +10,7 @@ COLORS = {
     'fg_dim': '\033[38;2;150;150;150m',
     'accent': '\033[38;2;200;50;50m',
     'accent_bold': '\033[38;2;220;80;80m',
+    'command': '\033[38;2;100;150;220m',
     'success': '\033[38;2;50;180;90m',
     'warning': '\033[38;2;220;180;50m',
     'border': '\033[38;2;80;80;80m',
@@ -90,6 +91,14 @@ def echo_card_line(content, width=60, fg=None):
     """Display card content line without side borders."""
     fg = fg or COLORS['fg']
     click.echo(styled(f"      {content}", fg=fg))
+
+
+def echo_card_command(command, description, width=60):
+    """Display command line with command in BLUE and description in default color."""
+    cmd_styled = styled(command, fg=COLORS['command'], bold=True)
+    desc_styled = styled(description, fg=COLORS['fg'])
+    spacing = " " * (14 - len(command))
+    click.echo(f"      {cmd_styled}{spacing}{desc_styled}")
 
 
 def echo_separator_close(width=60):

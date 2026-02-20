@@ -20,6 +20,7 @@ from mailaka.utils.display import (
     echo_card_header,
     echo_card_line,
     echo_card_kv,
+    echo_card_command,
 )
 
 
@@ -146,17 +147,17 @@ def start_interactive_mode():
     
     # Command panel - titre en ROUGE
     echo_card_header("Commandes", width=60)
-    echo_card_line("new           Creer adresse(s)               ", width=60)
-    echo_card_line("inbox         Voir messages                  ", width=60)
-    echo_card_line("read          Lire message                   ", width=60)
-    echo_card_line("delete        Supprimer                      ", width=60)
-    echo_card_line("attachments   Voir pieces jointes            ", width=60)
-    echo_card_line("inboxes       Lister inboxes                 ", width=60)
-    echo_card_line("status        Statut actif                   ", width=60)
-    echo_card_line("export        Exporter JSON                  ", width=60)
-    echo_card_line("import        Importer JSON                  ", width=60)
-    echo_card_line("clear         Effacer ecran                  ", width=60)
-    echo_card_line("exit          Quitter                        ", width=60)
+    echo_card_command("new", "Creer adresse(s)", width=60)
+    echo_card_command("inbox", "Voir messages", width=60)
+    echo_card_command("read", "Lire message", width=60)
+    echo_card_command("delete", "Supprimer", width=60)
+    echo_card_command("attachments", "Voir pieces jointes", width=60)
+    echo_card_command("inboxes", "Lister inboxes", width=60)
+    echo_card_command("status", "Statut actif", width=60)
+    echo_card_command("export", "Exporter JSON", width=60)
+    echo_card_command("import", "Importer JSON", width=60)
+    echo_card_command("clear", "Effacer ecran", width=60)
+    echo_card_command("exit", "Quitter", width=60)
     echo_separator_close(width=60)
     click.echo()
     
@@ -327,20 +328,20 @@ def show_help():
     """Display help message with Anthropic-style cards."""
     click.echo()
     echo_card_header("Commandes disponibles", width=60)
-    echo_card_line("new           Creer adresse(s)               ", width=60)
-    echo_card_line("delete        Supprimer messages/inboxes    ", width=60)
-    echo_card_line("inbox         Voir messages actifs          ", width=60)
-    echo_card_line("read          Lire un message              ", width=60)
-    echo_card_line("attachments   Voir pieces jointes           ", width=60)
-    echo_card_line("download      Telecharger pieces jointes   ", width=60)
-    echo_card_line("inboxes       Lister toutes inboxes         ", width=60)
-    echo_card_line("status        Statut adresse active         ", width=60)
-    echo_card_line("check         Verifier email/domaine        ", width=60)
-    echo_card_line("export        Exporter vers JSON           ", width=60)
-    echo_card_line("import        Importer depuis JSON        ", width=60)
-    echo_card_line("version       Afficher version             ", width=60)
-    echo_card_line("clear         Effacer ecran                ", width=60)
-    echo_card_line("exit          Quitter                       ", width=60)
+    echo_card_command("new", "Creer adresse(s)", width=60)
+    echo_card_command("delete", "Supprimer messages/inboxes", width=60)
+    echo_card_command("inbox", "Voir messages actifs", width=60)
+    echo_card_command("read", "Lire un message", width=60)
+    echo_card_command("attachments", "Voir pieces jointes", width=60)
+    echo_card_command("download", "Telecharger pieces jointes", width=60)
+    echo_card_command("inboxes", "Lister toutes inboxes", width=60)
+    echo_card_command("status", "Statut adresse active", width=60)
+    echo_card_command("check", "Verifier email/domaine", width=60)
+    echo_card_command("export", "Exporter vers JSON", width=60)
+    echo_card_command("import", "Importer depuis JSON", width=60)
+    echo_card_command("version", "Afficher version", width=60)
+    echo_card_command("clear", "Effacer ecran", width=60)
+    echo_card_command("exit", "Quitter", width=60)
     echo_separator_close(width=60)
     click.echo()
 
