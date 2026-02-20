@@ -47,6 +47,16 @@ Ou manuellement :
 pip install mailaka
 ```
 
+### Via npm / pnpm
+
+```bash
+# Avec npm
+npm install -g mailaka
+
+# Avec pnpm (plus rapide, moins d'espace disque)
+pnpm install -g mailaka
+```
+
 ### Via Git
 
 ```bash

@@ -1,0 +1,47 @@
+#!/usr/bin/env node
+/**
+ * Mailaka CLI wrapper - npm distribution
+ * This wrapper calls the Python backend
+ */
+
+const { spawn } = require('child_process');
+const path = require('path');
+const fs = require('fs');
+
+const pythonBin = process.env.MAILAKA_PYTHON || 'python3';
+const mailakaPath = path.join(__dirname, '..', 'mailaka', '__main__.py');
+
+// Check if running from source or installed
+const args = process.argv.slice(2);
+const options = {
+  stdio: 'inherit',
+  shell: process.platform === 'win32'
+};
+
+// Try different Python entry points
+const possiblePaths = [
+  path.join(__dirname, '..', 'venv', 'bin', 'mailaka'),
+  path.join(__dirname, '..', 'venv', 'Scripts', 'mailaka.exe'),
+  'mailaka',
+  path.join(__dirname, '..', 'mailaka', 'cli.py')
+];
+
+let spawned = false;
+for (const p of possiblePaths) {
+  if (fs.existsSync(p) || p === 'mailaka') {
+    const proc = spawn(pythonBin, [p, ...args], options);
+    proc.on('error', () => {});
+    spawned = true;
+    break;
+  }
+}
+
+if (!spawned) {
+  // Fallback to system mailaka if installed via pip
+  const proc = spawn('mailaka', args, { stdio: 'inherit', shell: true });
+  proc.on('error', (err) => {
+    console.error('Erreur: Mailaka n\'est pas installé.');
+    console.error('Veuillez installer avec: pip install mailaka');
+    process.exit(1);
+  });
+}

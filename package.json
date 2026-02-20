@@ -1,0 +1,37 @@
+{
+  "name": "mailaka",
+  "version": "1.0.0",
+  "description": "Generateur d'emails ephemeres en ligne de commande",
+  "main": "index.js",
+  "bin": {
+    "mailaka": "./bin/mailaka"
+  },
+  "scripts": {
+    "postinstall": "node scripts/install.js",
+    "test": "echo 'Tests in Python - see pyproject.toml'"
+  },
+  "keywords": [
+    "email",
+    "temp-mail",
+    "disposable-email",
+    "privacy",
+    "cli",
+    "temporary-email"
+  ],
+  "author": "Mihaja29",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Mihaja29/mailaka.git"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "files": [
+    "bin/",
+    "scripts/",
+    "README.md",
+    "LICENSE"
+  ],
+  "preferGlobal": true
+}
