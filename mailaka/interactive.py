@@ -26,7 +26,7 @@ MAILAKA_COMMANDS = {
     "/read": "Lire un message",
     "/attachments": "Voir + télécharger pièces jointes",
     "/download": "Télécharger pièces jointes",
-    "/inboxes": "Lister inboxes [⏳|🔒]",
+    "/inboxes": "Lister inboxes [TEMP|LONG]",
     "/note": "Ajouter note sur inbox",
     "/status": "Afficher adresse active",
     "/check": "Vérifier email/domaine",
@@ -119,12 +119,12 @@ def show_progress(message, duration=0.5):
 
 def echo_check(text):
     """Echo success with checkmark."""
-    click.echo(f"  [{styled('✔️', fg=FG_RED_FLUO, bold=True)}] {text}")
+    click.echo(f"  [{styled('OK', fg=FG_RED_FLUO, bold=True)}] {text}")
 
 
 def echo_cross(text):
     """Echo error with cross."""
-    click.echo(f"  [{styled('❌', fg=FG_RED_FLUO, bold=True)}] {text}")
+    click.echo(f"  [{styled('ERR', fg=FG_RED_FLUO, bold=True)}] {text}")
 
 
 def start_interactive_mode():
@@ -327,7 +327,7 @@ def show_help():
     echo("  Commandes disponibles:", bold=True)
     click.echo()
     click.echo(
-        f"    {styled('new', fg=FG_RED_FLUO, bold=True):<20} Créer adresse(s) [TEMP: 15min | LONG: 🔒 sécurisé]"
+        f"    {styled('new', fg=FG_RED_FLUO, bold=True):<20} Créer adresse(s) [TEMP: 15min | LONG: [SECURISE] sécurisé]"
     )
     click.echo(
         f"    {styled('delete', fg=FG_RED_FLUO, bold=True):<20} Supprimer multiples (messages: 1,2-4 ou inboxes: 1,3)"
@@ -375,7 +375,7 @@ def handle_new(args):
     try:
         click.echo()
         
-        # 🔒 Choix du type d'inbox: temporaire ou long terme
+        # [SECURISE] Choix du type d'inbox: temporaire ou long terme
         click.echo()
         echo("  Quel type d'adresse ?", bold=True)
         click.echo()
@@ -394,7 +394,7 @@ def handle_new(args):
         
         if inbox_type == "longterm":
             click.echo()
-            echo("  🔒 Mode Long Terme activé", fg=FG_BLUE_NIGHT, bold=True)
+            echo("  [SECURISE] Mode Long Terme activé", fg=FG_BLUE_NIGHT, bold=True)
             echo("  Sécurités appliquées:", fg=FG_GREY_PEARL)
             echo("    • Token API chiffré (Fernet)", fg=FG_GREY_PEARL)
             echo("    • Identifiants protégés en mémoire", fg=FG_GREY_PEARL)
@@ -571,13 +571,13 @@ def handle_new(args):
             if not created_inboxes:
                 raise ProviderError("Aucun email créé")
             
-            # 🔒 Ajouter type et date aux inboxes créées
+            # [SECURISE] Ajouter type et date aux inboxes créées
             from datetime import datetime
             for inbox in created_inboxes:
                 inbox.inbox_type = inbox_type
                 inbox.created_at = datetime.now().isoformat()
                 
-                # 🔒 Chiffrer token pour long terme
+                # [SECURISE] Chiffrer token pour long terme
                 if inbox_type == "longterm" and inbox.token:
                     try:
                         from cryptography.fernet import Fernet
@@ -588,7 +588,7 @@ def handle_new(args):
                     except:
                         pass  # Si cryptography pas installé
             
-            # 🔒 Vérifier limite inboxes long terme (max 3)
+            # [SECURISE] Vérifier limite inboxes long terme (max 3)
             storage = InboxStorage()
             inboxes = storage.load()
             
@@ -636,9 +636,9 @@ def handle_new(args):
                 echo(f"  Type: {styled(inbox_type.upper(), fg=FG_BLUE_NIGHT, bold=True)}", fg=FG_GREY_PEARL)
                 echo(f"  Provider: {inbox.provider}", fg=FG_GREY_PEARL)
                 if inbox_type == "longterm":
-                    echo(f"  🔒 Token chiffré", fg=FG_BLUE_NIGHT)
+                    echo(f"  [SECURISE] Token chiffré", fg=FG_BLUE_NIGHT)
                 else:
-                    echo(f"  ⏳ Expiration: 15 minutes", fg=FG_GREY_PEARL)
+                    echo(f"  [TEMP] Expiration: 15 minutes", fg=FG_GREY_PEARL)
             else:
                 echo_check(f"{len(created_inboxes)} adresses {inbox_type} créées:")
                 for inbox in created_inboxes:
@@ -659,7 +659,7 @@ def handle_new(args):
                     provider = ProviderFactory.get_provider(prov_name)
                     inbox = provider.create_inbox()
                     
-                    # 🔒 Ajouter type et date
+                    # [SECURISE] Ajouter type et date
                     inbox.inbox_type = inbox_type
                     inbox.created_at = datetime.now().isoformat()
                     
@@ -672,7 +672,7 @@ def handle_new(args):
             else:
                 raise last_error or ProviderError("Aucun provider disponible")
             
-            # 🔒 Mode auto: sauvegarder avec même logique
+            # [SECURISE] Mode auto: sauvegarder avec même logique
             if inbox:
                 storage = InboxStorage()
                 inboxes = storage.load()
@@ -715,9 +715,9 @@ def handle_new(args):
                 echo(f"  Type: {styled(inbox_type.upper(), fg=FG_BLUE_NIGHT, bold=True)}", fg=FG_GREY_PEARL)
                 echo(f"  Provider: {inbox.provider}", fg=FG_GREY_PEARL)
                 if inbox_type == "longterm":
-                    echo(f"  🔒 Token chiffré", fg=FG_BLUE_NIGHT)
+                    echo(f"  [SECURISE] Token chiffré", fg=FG_BLUE_NIGHT)
                 else:
-                    echo(f"  ⏳ Expiration: 15 minutes", fg=FG_GREY_PEARL)
+                    echo(f"  [TEMP] Expiration: 15 minutes", fg=FG_GREY_PEARL)
                 echo(f"  Total: {len(inboxes)}/5 inboxes", fg=FG_GREY_PEARL)
                 return
         else:
@@ -725,14 +725,14 @@ def handle_new(args):
             provider = ProviderFactory.get_provider(provider_name)
             inbox = provider.create_inbox()
             
-            # 🔒 Ajouter type et date
+            # [SECURISE] Ajouter type et date
             inbox.inbox_type = inbox_type
             inbox.created_at = datetime.now().isoformat()
             
             storage = InboxStorage()
             inboxes = storage.load()
             
-            # 🔒 Vérifier limite long terme pour mode auto
+            # [SECURISE] Vérifier limite long terme pour mode auto
             if inbox_type == "longterm":
                 longterm_count = sum(1 for i in inboxes if i.inbox_type == "longterm")
                 if longterm_count >= 3:
@@ -770,9 +770,9 @@ def handle_new(args):
             echo(f"  Type: {styled(inbox_type.upper(), fg=FG_BLUE_NIGHT, bold=True)}", fg=FG_GREY_PEARL)
             echo(f"  Provider: {inbox.provider}", fg=FG_GREY_PEARL)
             if inbox_type == "longterm":
-                echo(f"  🔒 Token chiffré", fg=FG_BLUE_NIGHT)
+                echo(f"  [SECURISE] Token chiffré", fg=FG_BLUE_NIGHT)
             else:
-                echo(f"  ⏳ Expiration: 15 minutes", fg=FG_GREY_PEARL)
+                echo(f"  [TEMP] Expiration: 15 minutes", fg=FG_GREY_PEARL)
             echo(f"  Total: {len(inboxes)}/5 inboxes", fg=FG_GREY_PEARL)
 
     except Exception as e:
@@ -896,7 +896,7 @@ def handle_check(email: str):
     
     # Disposable check
     if result.get("disposable"):
-        echo_cross("⚠️  Domaine temporaire/disposable détecté")
+        echo_cross("[WARN] Domaine temporaire/disposable détecté")
     else:
         echo_check("Domaine non-temporaire (probablement légitime)")
     
@@ -1088,7 +1088,7 @@ def handle_attachments(message_id):
                     echo(f"      Clés disponibles: {list(att.keys())}", fg=FG_GREY_PEARL)
                 continue
             
-            click.echo(f"    📎 {styled(filename, fg=FG_RED_FLUO, bold=True)} ({size:,} bytes) [ID: {att_id}]")
+            click.echo(f"    [PJ] {styled(filename, fg=FG_RED_FLUO, bold=True)} ({size:,} bytes) [ID: {att_id}]")
             
             # Auto-download all attachments
             try:
@@ -1151,7 +1151,7 @@ def handle_download(message_id):
                 if data:
                     with open(filename, 'wb') as f:
                         f.write(data)
-                    echo_check(f"  📥 {filename}")
+                    echo_check(f"  [DL] {filename}")
                 else:
                     echo_cross(f"  ❌ {filename}: pas de données")
             except Exception as e:
@@ -1211,13 +1211,13 @@ def handle_inboxes():
         # Déterminer type et affichage
         inbox_type = getattr(inbox, 'inbox_type', 'temp')
         if inbox_type == "longterm":
-            type_indicator = styled("🔒 LONG", fg=FG_BLUE_NIGHT, bold=True)
+            type_indicator = styled("[SECURISE] LONG", fg=FG_BLUE_NIGHT, bold=True)
         else:
             remaining = getattr(inbox, '_remaining', None)
             if remaining is not None:
-                type_indicator = styled(f"⏳ {remaining}min", fg=FG_GREY_PEARL)
+                type_indicator = styled(f"[TEMP] {remaining}min", fg=FG_GREY_PEARL)
             else:
-                type_indicator = styled("⏳ TEMP", fg=FG_GREY_PEARL)
+                type_indicator = styled("[TEMP] TEMP", fg=FG_GREY_PEARL)
         
         click.echo(f"    [{styled(str(idx), fg=FG_RED_FLUO, bold=True)}] {styled(inbox.address, fg=FG_RED_FLUO, bold=True)} {type_indicator}{is_active}")
         click.echo(f"      Provider: {inbox.provider}")
