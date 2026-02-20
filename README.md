@@ -14,7 +14,6 @@ Generateur d'emails ephemeres en ligne de commande pour proteger votre vie prive
 - Mode interactif - Interface utilisateur elegante
 - Pieces jointes - Telechargement supporte
 - Export/Import - JSON pour portabilite
-- Dashboard Web - Interface moderne (voir section Dashboard)
 
 ## Installation
 
@@ -56,18 +55,6 @@ cd mailaka
 pip install -e .
 ```
 
-## Dashboard Web
-
-Mailaka inclut un dashboard web moderne pour visualiser vos inboxes et messages.
-
-**Lancer le dashboard :**
-```bash
-cd mailaka/dashboard
-python server.py
-```
-
-Puis ouvrir http://localhost:8080 dans votre navigateur.
-
 ## Utilisation rapide
 
 ```bash
@@ -101,11 +88,6 @@ mailaka/
 │   ├── core/
 │   ├── interactive.py
 │   └── utils/
-├── dashboard/          # Dashboard web
-│   ├── index.html
-│   ├── styles.css
-│   ├── dashboard.js
-│   └── server.py
 ├── tests/
 ├── install.sh
 ├── install.ps1
