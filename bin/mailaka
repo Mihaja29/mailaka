@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * Mailaka CLI wrapper - npm distribution
- * Installs Python dependencies on first run, then executes mailaka
+ * Mailaka Auto-Fix Wrapper
+ * Detecte et corrige automatiquement les problemes d'installation
  */
 
 const { spawn, execSync } = require('child_process');
@@ -18,110 +18,204 @@ const colors = {
 };
 
 function log(msg, color = 'blue') {
-  console.log(`${colors[color]}[mailaka]${colors.reset} ${msg}`);
+  console.log(`${colors[color]}●${colors.reset} ${msg}`);
+}
+
+function warn(msg) {
+  console.log(`${colors.yellow}●${colors.reset} ${msg}`);
+}
+
+function error(msg) {
+  console.error(`${colors.red}●${colors.reset} ${msg}`);
+}
+
+function success(msg) {
+  console.log(`${colors.green}✔${colors.reset} ${msg}`);
+}
+
+// Detection
+function getInstallPath() {
+  const npmGlobal = execSync('npm root -g', { encoding: 'utf8' }).trim();
+  return path.join(npmGlobal, 'mailaka');
 }
 
 function checkPython() {
+  const candidates = ['python3', 'python'];
+  for (const cmd of candidates) {
+    try {
+      const version = execSync(`${cmd} --version`, { encoding: 'utf8', stdio: 'pipe' }).trim();
+      return { cmd, version };
+    } catch {}
+  }
+  return null;
+}
+
+function checkVenv(baseDir) {
+  const venvPath = path.join(baseDir, 'venv');
+  return {
+    exists: fs.existsSync(venvPath),
+    path: venvPath
+  };
+}
+
+function checkMailakaInstalled(venvPath) {
+  const mailakaPath = os.platform() === 'win32'
+    ? path.join(venvPath, 'Scripts', 'mailaka.exe')
+    : path.join(venvPath, 'bin', 'mailaka');
+  return fs.existsSync(mailakaPath);
+}
+
+// Fixes
+function fixPythonMissing() {
+  error('Python 3.8+ est requis mais non trouvé.');
+  console.log('\nInstallation de Python :');
+  console.log('  Ubuntu/Debian:  sudo apt install python3 python3-pip python3-venv');
+  console.log('  macOS:          brew install python3');
+  console.log('  Windows:        https://python.org/downloads\n');
+  return false;
+}
+
+function fixVenv(baseDir, python) {
+  log('Creation du virtualenv...');
   try {
-    execSync('python3 --version', { stdio: 'pipe' });
-    return 'python3';
-  } catch {
-    try {
-      execSync('python --version', { stdio: 'pipe' });
-      return 'python';
-    } catch {
-      return null;
-    }
+    execSync(`${python.cmd} -m venv "${path.join(baseDir, 'venv')}"`, { 
+      stdio: 'inherit',
+      cwd: baseDir
+    });
+    success('Virtualenv créé');
+    return true;
+  } catch (err) {
+    error('Échec de la création du virtualenv');
+    return false;
   }
 }
 
-function getBaseDir() {
-  // Get the directory where mailaka npm package is installed
-  return path.dirname(__dirname);
-}
-
-function getVenvPath() {
-  return path.join(getBaseDir(), 'venv');
-}
-
-function getPipPath() {
-  const venv = getVenvPath();
-  return os.platform() === 'win32' 
-    ? path.join(venv, 'Scripts', 'pip.exe')
-    : path.join(venv, 'bin', 'pip');
-}
-
-function getMailakaPath() {
-  const venv = getVenvPath();
-  return os.platform() === 'win32'
-    ? path.join(venv, 'Scripts', 'mailaka.exe')
-    : path.join(venv, 'bin', 'mailaka');
-}
-
-function setupVenv() {
-  const python = checkPython();
-  if (!python) {
-    console.error(`${colors.red}Erreur:${colors.reset} Python 3.8+ requis mais non trouvé.`);
-    console.error('Veuillez installer Python:');
-    console.error('  Ubuntu/Debian: sudo apt install python3 python3-pip python3-venv');
-    console.error('  macOS: brew install python3');
-    console.error('  Windows: https://python.org/downloads');
-    process.exit(1);
-  }
-
-  const venvPath = getVenvPath();
-  const baseDir = getBaseDir();
-
-  // Create venv if not exists
-  if (!fs.existsSync(venvPath)) {
-    log('Première exécution - Configuration de l\'environnement...');
-    log('Création du virtualenv...');
-    try {
-      execSync(`${python} -m venv "${venvPath}"`, { stdio: 'inherit' });
-    } catch (err) {
-      console.error(`${colors.red}Erreur:${colors.reset} Impossible de créer le virtualenv`);
-      process.exit(1);
-    }
-  }
-
-  const pip = getPipPath();
+function fixMailakaInstall(baseDir, venvPath) {
+  log('Installation de Mailaka...');
+  const pip = os.platform() === 'win32'
+    ? path.join(venvPath, 'Scripts', 'pip.exe')
+    : path.join(venvPath, 'bin', 'pip');
   
-  // Upgrade pip
-  try {
-    execSync(`"${pip}" install --upgrade pip`, { stdio: 'pipe' });
-  } catch {
-    // Ignore errors
-  }
-
-  // Install mailaka
-  log('Installation des dépendances...');
   try {
     execSync(`"${pip}" install -e "${baseDir}"`, { stdio: 'inherit' });
-    log('Installation terminée!', 'green');
+    success('Mailaka installé');
+    return true;
   } catch (err) {
-    console.error(`${colors.red}Erreur:${colors.reset} Échec de l'installation`);
-    process.exit(1);
+    error('Échec de l\'installation');
+    return false;
   }
+}
+
+function fixPermissions(venvPath) {
+  if (os.platform() === 'win32') return true;
+  
+  try {
+    const binPath = path.join(venvPath, 'bin');
+    fs.chmodSync(binPath, 0o755);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// Main
+function runWithAutoFix() {
+  console.log(`${colors.blue}═══════════════════════════════════════════════════${colors.reset}`);
+  console.log(`${colors.blue}  Mailaka - Diagnostic et correction automatique${colors.reset}`);
+  console.log(`${colors.blue}═══════════════════════════════════════════════════${colors.reset}\n`);
+  
+  // 1. Verifier Python
+  const python = checkPython();
+  if (!python) {
+    return fixPythonMissing();
+  }
+  log(`Python trouvé: ${python.version}`);
+  
+  // 2. Obtenir le chemin d'installation
+  let baseDir;
+  try {
+    baseDir = getInstallPath();
+    log(`Chemin d'installation: ${baseDir}`);
+  } catch (err) {
+    // Fallback: utiliser le répertoire parent du script
+    baseDir = path.dirname(path.dirname(__filename));
+    warn(`Chemin npm non détecté, utilisation de: ${baseDir}`);
+  }
+  
+  if (!fs.existsSync(baseDir)) {
+    error(`Répertoire d'installation introuvable: ${baseDir}`);
+    return false;
+  }
+  
+  // 3. Verifier/Creer virtualenv
+  const venv = checkVenv(baseDir);
+  if (!venv.exists) {
+    log('Virtualenv manquant');
+    if (!fixVenv(baseDir, python)) return false;
+  } else {
+    success('Virtualenv présent');
+  }
+  
+  // 4. Verifier/Corriger permissions
+  fixPermissions(venv.path);
+  
+  // 5. Verifier/Installer Mailaka
+  if (!checkMailakaInstalled(venv.path)) {
+    log('Mailaka n\'est pas installé dans le virtualenv');
+    if (!fixMailakaInstall(baseDir, venv.path)) return false;
+  } else {
+    success('Mailaka installé');
+  }
+  
+  console.log(`\n${colors.green}═══════════════════════════════════════════════════${colors.reset}`);
+  console.log(`${colors.green}  Correction terminée! Redémarrage...${colors.reset}`);
+  console.log(`${colors.green}═══════════════════════════════════════════════════${colors.reset}\n`);
+  
+  return true;
 }
 
 function runMailaka() {
-  const mailaka = getMailakaPath();
-  const args = process.argv.slice(2);
+  const baseDir = getInstallPath();
+  const venvPath = path.join(baseDir, 'venv');
+  const mailakaPath = os.platform() === 'win32'
+    ? path.join(venvPath, 'Scripts', 'mailaka.exe')
+    : path.join(venvPath, 'bin', 'mailaka');
   
-  // Check if venv exists and mailaka is installed
-  if (!fs.existsSync(mailaka)) {
-    setupVenv();
-  }
-
-  // Run mailaka
-  const proc = spawn(mailaka, args, { stdio: 'inherit' });
+  const args = process.argv.slice(2);
+  const proc = spawn(mailakaPath, args, { stdio: 'inherit' });
+  
   proc.on('error', (err) => {
-    console.error(`${colors.red}Erreur:${colors.reset} ${err.message}`);
-    process.exit(1);
+    if (err.code === 'ENOENT') {
+      error('Mailaka introuvable, tentative de correction...');
+      if (runWithAutoFix()) {
+        console.log('\nRelance de mailaka...\n');
+        runMailaka();
+      }
+    } else {
+      error(`Erreur: ${err.message}`);
+      process.exit(1);
+    }
   });
+  
   proc.on('exit', (code) => {
+    if (code && code !== 0) {
+      // Erreur de sortie du programme - tenter auto-fix
+      if (code === 127 || code === 9009) { // command not found
+        warn('Mailaka semble avoir un probleme, correction...');
+        if (runWithAutoFix()) {
+          console.log('\nRelance de mailaka...\n');
+          runMailaka();
+          return;
+        }
+      }
+    }
     process.exit(code || 0);
   });
 }
 
-runMailaka();
+// Check if running diagnostics only
+if (process.argv.includes('--fix') || process.argv.includes('--repair')) {
+  runWithAutoFix();
+} else {
+  runMailaka();
+}
