@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mailaka Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <span class="logo-icon">M</span>
+                <span class="logo-text">Mailaka</span>
+            </div>
+            <nav class="nav">
+                <a href="#" class="nav-item active">
+                    <span class="nav-icon">⊞</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">✉</span>
+                    <span>Inboxes</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">⚡</span>
+                    <span>Activity</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">⚙</span>
+                    <span>Settings</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Header -->
+            <header class="header">
+                <h1>Dashboard</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary">+ New Inbox</button>
+                    <div class="user-menu">
+                        <span class="user-avatar">M</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Active Inboxes</span>
+                        <span class="stat-trend up">+12%</span>
+                    </div>
+                    <div class="stat-value">5</div>
+                    <div class="stat-chart">
+                        <canvas id="inboxChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Messages Received</span>
+                        <span class="stat-trend up">+28%</span>
+                    </div>
+                    <div class="stat-value">128</div>
+                    <div class="stat-chart">
+                        <canvas id="messagesChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Attachments</span>
+                        <span class="stat-trend down">-5%</span>
+                    </div>
+                    <div class="stat-value">23</div>
+                    <div class="stat-chart">
+                        <canvas id="attachmentsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Grid -->
+            <div class="content-grid">
+                <!-- Recent Activity -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2>Recent Activity</h2>
+                        <button class="btn btn-secondary">View All</button>
+                    </div>
+                    <div class="activity-list">
+                        <div class="activity-item">
+                            <div class="activity-icon">✉</div>
+                            <div class="activity-content">
+                                <div class="activity-title">New message received</div>
+                                <div class="activity-meta">test@dollicons.com • 2 min ago</div>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon success">✔</div>
+                            <div class="activity-content">
+                                <div class="activity-title">Inbox created</div>
+                                <div class="activity-meta">user@teihu.com • 15 min ago</div>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon error">✖</div>
+                            <div class="activity-content">
+                                <div class="activity-title">Inbox expired</div>
+                                <div class="activity-meta">temp@guerrillamail.com • 1 hour ago</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Provider Status -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2>Provider Status</h2>
+                    </div>
+                    <div class="provider-list">
+                        <div class="provider-item">
+                            <div class="provider-info">
+                                <span class="provider-name">mail.tm</span>
+                                <span class="provider-domain">@dollicons.com</span>
+                            </div>
+                            <span class="status-badge online">Online</span>
+                        </div>
+                        <div class="provider-item">
+                            <div class="provider-info">
+                                <span class="provider-name">mail.gw</span>
+                                <span class="provider-domain">@oakon.com</span>
+                            </div>
+                            <span class="status-badge online">Online</span>
+                        </div>
+                        <div class="provider-item">
+                            <div class="provider-info">
+                                <span class="provider-name">GuerrillaMail</span>
+                                <span class="provider-domain">@guerrillamailblock.com</span>
+                            </div>
+                            <span class="status-badge online">Online</span>
+                        </div>
+                        <div class="provider-item">
+                            <div class="provider-info">
+                                <span class="provider-name">tempmail.io</span>
+                                <span class="provider-domain">@bltiwd.com</span>
+                            </div>
+                            <span class="status-badge warning">Rate Limited</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Message Preview -->
+            <div class="panel message-preview">
+                <div class="panel-header">
+                    <h2>Latest Messages</h2>
+                </div>
+                <div class="message-list">
+                    <div class="message-item">
+                        <div class="message-sender">
+                            <div class="sender-avatar">S</div>
+                            <div class="sender-info">
+                                <div class="sender-name">Service</div>
+                                <div class="sender-email">noreply@example.com</div>
+                            </div>
+                        </div>
+                        <div class="message-content">
+                            <div class="message-subject">Verification code: 123456</div>
+                            <div class="message-preview-text">Your verification code is 123456. Valid for 10 minutes.</div>
+                        </div>
+                        <div class="message-time">2 min ago</div>
+                    </div>
+                    <div class="message-item">
+                        <div class="message-sender">
+                            <div class="sender-avatar">A</div>
+                            <div class="sender-info">
+                                <div class="sender-name">App Store</div>
+                                <div class="sender-email">no-reply@appstore.com</div>
+                            </div>
+                        </div>
+                        <div class="message-content">
+                            <div class="message-subject">Welcome to our service</div>
+                            <div class="message-preview-text">Thank you for signing up. Click here to verify your account...</div>
+                        </div>
+                        <div class="message-time">15 min ago</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>
