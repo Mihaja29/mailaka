@@ -131,7 +131,37 @@ ruff check .
 | GuerrillaMail | @guerrillamailblock.com | Oui | Fiable |
 | tempmail.io | 10+ domaines | Non | Simple |
 
-## License
+## Troubleshooting
+
+### Problemes d'installation npm
+
+Si vous rencontrez des erreurs avec l'installation npm, utilisez le mode de correction automatique :
+
+```bash
+# Lancer le diagnostic et correction
+mailaka --fix
+# ou
+mailaka --repair
+```
+
+Le wrapper detecte automatiquement :
+- Python manquant
+- Virtualenv manquant  
+- Mailaka non installe dans le venv
+- Problemes de permissions
+
+### Desinstaller proprement
+
+```bash
+# Via npm
+npm uninstall -g mailaka
+
+# Via pip
+pip uninstall mailaka
+
+# Supprimer les donnees
+rm ~/.mailaka_config.json ~/.mailaka_inboxes.json
+```
 
 MIT License - voir [LICENSE](LICENSE)
 
