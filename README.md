@@ -8,155 +8,150 @@
 
 ## ✨ Fonctionnalités
 
-- Création rapide d'adresses email temporaires
-- Protection de la vie privée
-- Multi-providers (1secmail, mail.tm, GuerrillaMail)
-- Stockage local automatique
-- Interface élégante avec couleurs
-- Léger et rapide
+- 🔒 **Sécurisé** - Chiffrement des tokens API
+- 📧 **Multi-providers** - mail.tm, mail.gw, GuerrillaMail, tempmail.io
+- 🖥️ **Cross-platform** - Linux, macOS, Windows
+- 💻 **Mode interactif** - Interface utilisateur élégante
+- 📎 **Pièces jointes** - Téléchargement supporté
+- 🔄 **Export/Import** - JSON pour portabilité
 
-## Installation
+## 📦 Installation
+
+### 🐧 Linux / 🍎 macOS (via script)
 
 ```bash
-# Cloner le repository
-git clone <your-repo-url>
-cd mailaka
+curl -sSL https://raw.githubusercontent.com/Mihaja29/mailaka/main/install.sh | bash
+```
 
-# Installer en mode développement
+Ou manuellement :
+```bash
+# Télécharger le binaire
+wget https://github.com/Mihaja29/mailaka/releases/latest/download/mailaka-linux
+chmod +x mailaka-linux
+sudo mv mailaka-linux /usr/local/bin/mailaka
+```
+
+### 🪟 Windows (via PowerShell)
+
+```powershell
+powershell -ExecutionPolicy Bypass -Command "Invoke-Expression (Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/Mihaja29/mailaka/main/install.ps1').Content"
+```
+
+Ou manuellement :
+1. Télécharger `mailaka-windows.exe` depuis les [releases](https://github.com/Mihaja29/mailaka/releases)
+2. Renommer en `mailaka.exe`
+3. Ajouter au PATH
+
+### 🐍 Via pip (toutes plateformes)
+
+```bash
+pip install mailaka
+```
+
+### 📦 Via Git (développement)
+
+```bash
+git clone https://github.com/Mihaja29/mailaka.git
+cd mailaka
 pip install -e .
 ```
 
-## Utilisation
-
-### Commandes principales
+## 🚀 Utilisation rapide
 
 ```bash
-# Afficher l'aide
-mailaka --help
+# Créer une adresse
+mailaka new
 
-# Créer une nouvelle adresse email temporaire
-mailaka new                           # Mode auto (essaye tous les providers)
-mailaka new --provider 1secmail       # Provider spécifique
-mailaka new --provider mailtm
-mailaka new --provider guerrillamail
-
-# Afficher le statut de l'adresse active
-mailaka status
-
-# Lister toutes les inboxes sauvegardées
-mailaka inboxes
-
-# Lister les emails reçus
+# Voir les messages
 mailaka inbox
 
-# Lire un email spécifique
+# Lire un message
 mailaka read <message-id>
 
-# Lister les pièces jointes d'un email
-mailaka attachments <message-id>
-
-# Télécharger une pièce jointe (si supporté)
-mailaka download <attachment-id> -o fichier.pdf
-
-# Supprimer un email (non supporté par la plupart des providers)
-mailaka delete <message-id>
-
-# Afficher la version
-mailaka version
+# Mode interactif (recommandé)
+mailaka
 ```
 
-### Exemples d'utilisation
-
-```bash
-# Workflow typique
-mailaka new                    # 1. Créer une adresse
-mailaka status                 # 2. Voir l'adresse active
-mailaka inbox                  # 3. Lister les messages reçus
-mailaka read 12345             # 4. Lire un message spécifique
-mailaka attachments 12345      # 5. Voir les pièces jointes (si disponibles)
-```
-
-## Architecture
-
-```
-mailaka/
-├── mailaka/                     # Package principal
-│   ├── __init__.py
-│   ├── __main__.py              # Point d'entrée (python -m mailaka)
-│   ├── cli.py                   # Logique principale CLI
-│   ├── commands/                # Commandes simplifiées
-│   │   ├── __init__.py
-│   │   ├── new.py               # Créer une nouvelle adresse
-│   │   ├── inbox.py             # Lister les messages
-│   │   ├── read.py              # Lire un message
-│   │   ├── delete.py            # Supprimer un message
-│   │   ├── attachments.py       # Lister les pièces jointes
-│   │   ├── download.py          # Télécharger une pièce jointe
-│   │   └── status.py            # Afficher le statut
-│   ├── core/                    # Cœur métier
-│   │   ├── __init__.py
-│   │   ├── provider.py          # Gestion des APIs (providers)
-│   │   ├── storage.py           # Sauvegarde locale
-│   │   └── models.py            # Modèles de données (Inbox, Message)
-│   └── utils/                   # Utilitaires
-│       ├── __init__.py
-│       ├── display.py           # Fonctions d'affichage
-│       ├── errors.py            # Gestion des erreurs
-│       └── config.py            # Configuration
-├── tests/                       # Tests unitaires
-├── README.md
-├── LICENSE
-└── pyproject.toml
-```
-
-## Commandes disponibles
+## 📚 Commandes disponibles
 
 | Commande | Description |
 |----------|-------------|
-| `mailaka new` | Crée une nouvelle adresse email temporaire |
-| `mailaka inbox` | Liste les emails reçus dans la boîte active |
-| `mailaka inboxes` | Liste toutes les inboxes sauvegardées |
-| `mailaka read <id>` | Affiche le contenu d'un email |
-| `mailaka delete <id>` | Supprime un email (non supporté) |
-| `mailaka attachments <id>` | Liste les pièces jointes d'un email |
-| `mailaka download <id>` | Télécharge une pièce jointe |
-| `mailaka status` | Affiche l'adresse active et infos |
-| `mailaka version` | Affiche la version de Mailaka |
+| `mailaka new` | Créer une adresse temporaire |
+| `mailaka inbox` | Lister les messages reçus |
+| `mailaka inboxes` | Lister toutes les inboxes |
+| `mailaka read <id>` | Lire un message |
+| `mailaka delete <id>` | Supprimer un message |
+| `mailaka attachments <id>` | Voir les pièces jointes |
+| `mailaka status` | Statut de l'adresse active |
+| `mailaka export` | Exporter vers JSON |
+| `mailaka import <fichier>` | Importer depuis JSON |
+| `mailaka version` | Afficher la version |
 
-## Providers supportés
+## 🏗️ Architecture
 
-### 1secmail
-- Simple, rapide, pas de mot de passe
-- URL: https://www.1secmail.com
-
-### mail.tm
-- Plus sécurisé avec authentification
-- URL: https://mail.tm
-
-### GuerrillaMail
-- Fiable, bien établi
-- URL: https://www.guerrillamail.com
-
-## Développement
-
-```bash
-# Installer en mode développement
-pip install -e .
-
-# Structure du projet
-# - Ajoutez de nouveaux providers dans mailaka/core/provider.py
-# - Ajoutez de nouvelles commandes dans mailaka/commands/
-# - Les tests vont dans tests/
+```
+mailaka/
+├── mailaka/              # Package principal
+│   ├── commands/         # Commandes CLI
+│   ├── core/             # Logique métier
+│   │   ├── provider.py   # Gestion providers
+│   │   ├── storage.py    # Stockage local
+│   │   └── models.py     # Modèles
+│   ├── interactive.py    # Mode interactif
+│   └── utils/            # Utilitaires
+├── tests/                # Tests
+├── install.sh            # Install Linux/macOS
+├── install.ps1           # Install Windows
+└── pyproject.toml        # Configuration
 ```
 
-## License
+## 🔧 Développement
 
-MIT License - voir le fichier [LICENSE](LICENSE) pour plus de détails.
+```bash
+# Setup
+git clone https://github.com/Mihaja29/mailaka.git
+cd mailaka
+python -m venv venv
+source venv/bin/activate
+pip install -e ".[dev]"
 
-## Contribution
+# Tests
+pytest
 
-Les contributions sont les bienvenues! N'hésitez pas à ouvrir une issue ou une pull request.
+# Lint
+ruff check .
 
-## Avertissement
+# Build binaires
+pyinstaller --onefile mailaka/cli.py
+```
 
-Les emails éphémères ne doivent **PAS** être utilisés pour des services importants (banques, services gouvernementaux, etc.). Ils sont destinés à éviter le spam et protéger votre vie privée pour des inscriptions temporaires.
+## 🌐 Providers supportés
+
+| Provider | Domaines | PJ | Notes |
+|----------|----------|-----|-------|
+| mail.tm | @dollicons.com, etc. | ✅ | Personnalisable |
+| mail.gw | @oakon.com, etc. | ✅ | Personnalisable |
+| GuerrillaMail | @guerrillamailblock.com | ✅ | Fiable |
+| tempmail.io | 10+ domaines | ❌ | Simple |
+
+## 🤝 Contribution
+
+```bash
+# Fork → Clone → Branch → Commit → PR
+git checkout -b feature/ma-feature
+git commit -m "Add ma feature"
+git push origin feature/ma-feature
+```
+
+## 📄 License
+
+MIT License - voir [LICENSE](LICENSE)
+
+## ⚠️ Avertissement
+
+**Ne pas utiliser** pour services sensibles (banques, gouvernement, etc.).  
+Destiné à la protection anti-spam et vie privée temporaire.
+
+---
+
+**Made with 🦞 by Mihaja**

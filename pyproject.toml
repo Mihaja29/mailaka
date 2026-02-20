@@ -4,21 +4,53 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mailaka"
-version = "0.1"
-description = "Mailaka CLI"
+version = "1.0.0"
+description = "Mailaka - CLI temp email client with multiple providers"
+readme = "README.md"
+license = {text = "MIT"}
 requires-python = ">=3.8"
+authors = [
+    {name = "Mihaja", email = "mihaja@example.com"}
+]
+keywords = ["email", "temp-mail", "cli", "privacy", "disposable-email"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Communications :: Email",
+    "Topic :: Utilities",
+]
 dependencies = [
     "click>=8.0",
+    "requests>=2.25.0",
+    "cryptography>=3.0",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest",
-    "ruff",
+    "pytest>=7.0",
+    "ruff>=0.1.0",
+    "pyinstaller>=6.0",
 ]
 
 [project.scripts]
 mailaka = "mailaka.cli:main"
 
+[project.urls]
+Homepage = "https://github.com/Mihaja29/mailaka"
+Repository = "https://github.com/Mihaja29/mailaka"
+Issues = "https://github.com/Mihaja29/mailaka/issues"
+
 [tool.setuptools.packages.find]
 where = ["."]
+include = ["mailaka*"]
+
+[tool.setuptools.package-data]
+mailaka = ["py.typed"]

@@ -1,0 +1,123 @@
+name: Build Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install .[dev]
+      
+      - name: Build binary with PyInstaller
+        run: |
+          pyinstaller --onefile --name mailaka-linux \
+            --add-data "mailaka:mailaka" \
+            --hidden-import=cryptography \
+            --hidden-import=requests \
+            --clean \
+            mailaka/cli.py
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mailaka-linux
+          path: dist/mailaka-linux
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install .[dev]
+      
+      - name: Build binary with PyInstaller
+        run: |
+          pyinstaller --onefile --name mailaka-windows.exe `
+            --add-data "mailaka;mailaka" `
+            --hidden-import=cryptography `
+            --hidden-import=requests `
+            --clean `
+            mailaka/cli.py
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mailaka-windows
+          path: dist/mailaka-windows.exe
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install .[dev]
+      
+      - name: Build binary with PyInstaller
+        run: |
+          pyinstaller --onefile --name mailaka-macos \
+            --add-data "mailaka:mailaka" \
+            --hidden-import=cryptography \
+            --hidden-import=requests \
+            --clean \
+            mailaka/cli.py
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mailaka-macos
+          path: dist/mailaka-macos
+
+  create-release:
+    needs: [build-linux, build-windows, build-macos]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            mailaka-linux/mailaka-linux
+            mailaka-windows/mailaka-windows.exe
+            mailaka-macos/mailaka-macos
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
