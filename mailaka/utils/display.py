@@ -24,18 +24,14 @@ BOLD = '\033[1m'
 DIM = '\033[2m'
 RESET = COLORS['reset']
 
-BANNER = f"""
-  ┌─────────────────────────────────────────────────────────────┐
-  │                                                             │
-  │  ███╗   ███╗ █████╗ ██╗██╗      █████╗ ██╗  ██╗ █████╗     │
-  │  ████╗ ████║██╔══██╗██║██║     ██╔══██╗██║ ██╔╝██╔══██╗    │
-  │  ██╔████╔██║███████║██║██║     ███████║█████╔╝ ███████║    │
-  │  ██║╚██╔╝██║██╔══██║██║██║     ██╔══██║██╔═██╗ ██╔══██║    │
-  │  ██║ ╚═╝ ██║██║  ██║██║███████╗██║  ██║██║  ██╗██║  ██║    │
-  │  ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝    │
-  │                                                             │
-  └─────────────────────────────────────────────────────────────┘
-{RESET}"""
+BANNER = styled("""
+   ███╗   ███╗ █████╗ ██╗██╗      █████╗ ██╗  ██╗ █████╗
+   ████╗ ████║██╔══██╗██║██║     ██╔══██╗██║ ██╔╝██╔══██╗
+   ██╔████╔██║███████║██║██║     ███████║█████╔╝ ███████║
+   ██║╚██╔╝██║██╔══██║██║██║     ██╔══██║██╔═██╗ ██╔══██║
+   ██║ ╚═╝ ██║██║  ██║██║███████╗██║  ██║██║  ██╗██║  ██║
+   ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝
+""", fg=COLORS['accent'], bold=True)
 
 
 def styled(text, fg=None, bold=False):
@@ -52,8 +48,8 @@ def echo(text, fg=None, bold=False):
 
 
 def echo_separator(width=60):
-    """Echo top border of card."""
-    click.echo(styled(f"  ┌{'─' * width}┐", fg=COLORS['border']))
+    """Echo separator line (title bar only)."""
+    click.echo(styled(f"  {'─' * width}", fg=COLORS['border']))
 
 
 def echo_error(text):
@@ -95,37 +91,24 @@ def echo_card_header(title, width=60):
 
 
 def echo_card_line(content, width=60, fg=None):
-    """Display card content line."""
+    """Display card content line without side borders."""
     fg = fg or COLORS['fg']
-    content_styled = styled(content, fg=fg)
-    
-    # Calculate exact padding needed
-    content_len = len(content)
-    padding = width - content_len
-    if padding < 0:
-        padding = 0
-    
-    border_left = styled("  │ ", fg=COLORS['border'])
-    border_right = styled("│", fg=COLORS['border'])
-    
-    click.echo(f"{border_left}{content_styled}{' ' * padding}{border_right}")
+    click.echo(styled(f"  {content}", fg=fg))
 
 
 def echo_separator_close(width=60):
-    """Echo closing separator."""
-    border = styled("  └", fg=COLORS['border']) + styled("─" * width, fg=COLORS['border']) + styled("┘", fg=COLORS['border'])
-    click.echo(border)
+    """No bottom border - just empty line."""
+    click.echo()
 
 
 def echo_card_kv(key, value, width=60, key_width=15):
-    """Display key-value pair in card."""
+    """Display key-value pair without borders."""
     key_str = f"{key}:".ljust(key_width)
     val_str = str(value)
     remaining = width - key_width - 1
     if len(val_str) > remaining:
         val_str = val_str[:remaining-3] + "..."
-    line = f"{key_str}{val_str}"
-    echo_card_line(line, width)
+    click.echo(styled(f"  {key_str}{val_str}", fg=COLORS['fg']))
 
 
 def echo_section(title, width=60):
