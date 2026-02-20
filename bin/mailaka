@@ -1,47 +1,123 @@
 #!/usr/bin/env node
 /**
  * Mailaka CLI wrapper - npm distribution
- * This wrapper calls the Python backend
+ * Installs Python dependencies on first run, then executes mailaka
  */
 
-const { spawn } = require('child_process');
+const { spawn, execSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 
-const pythonBin = process.env.MAILAKA_PYTHON || 'python3';
-const mailakaPath = path.join(__dirname, '..', 'mailaka', '__main__.py');
-
-// Check if running from source or installed
-const args = process.argv.slice(2);
-const options = {
-  stdio: 'inherit',
-  shell: process.platform === 'win32'
+const colors = {
+  red: '\x1b[31m',
+  green: '\x1b[32m',
+  blue: '\x1b[34m',
+  yellow: '\x1b[33m',
+  reset: '\x1b[0m'
 };
 
-// Try different Python entry points
-const possiblePaths = [
-  path.join(__dirname, '..', 'venv', 'bin', 'mailaka'),
-  path.join(__dirname, '..', 'venv', 'Scripts', 'mailaka.exe'),
-  'mailaka',
-  path.join(__dirname, '..', 'mailaka', 'cli.py')
-];
+function log(msg, color = 'blue') {
+  console.log(`${colors[color]}[mailaka]${colors.reset} ${msg}`);
+}
 
-let spawned = false;
-for (const p of possiblePaths) {
-  if (fs.existsSync(p) || p === 'mailaka') {
-    const proc = spawn(pythonBin, [p, ...args], options);
-    proc.on('error', () => {});
-    spawned = true;
-    break;
+function checkPython() {
+  try {
+    execSync('python3 --version', { stdio: 'pipe' });
+    return 'python3';
+  } catch {
+    try {
+      execSync('python --version', { stdio: 'pipe' });
+      return 'python';
+    } catch {
+      return null;
+    }
   }
 }
 
-if (!spawned) {
-  // Fallback to system mailaka if installed via pip
-  const proc = spawn('mailaka', args, { stdio: 'inherit', shell: true });
+function getVenvPath() {
+  const base = path.dirname(__dirname);
+  return path.join(base, 'venv');
+}
+
+function getPipPath() {
+  const venv = getVenvPath();
+  return os.platform() === 'win32' 
+    ? path.join(venv, 'Scripts', 'pip.exe')
+    : path.join(venv, 'bin', 'pip');
+}
+
+function getMailakaPath() {
+  const venv = getVenvPath();
+  return os.platform() === 'win32'
+    ? path.join(venv, 'Scripts', 'mailaka.exe')
+    : path.join(venv, 'bin', 'mailaka');
+}
+
+function setupVenv() {
+  const python = checkPython();
+  if (!python) {
+    console.error(`${colors.red}Erreur:${colors.reset} Python 3.8+ requis mais non trouvé.`);
+    console.error('Veuillez installer Python:');
+    console.error('  Ubuntu/Debian: sudo apt install python3 python3-pip python3-venv');
+    console.error('  macOS: brew install python3');
+    console.error('  Windows: https://python.org/downloads');
+    process.exit(1);
+  }
+
+  const venvPath = getVenvPath();
+  const baseDir = path.dirname(__dirname);
+
+  // Create venv if not exists
+  if (!fs.existsSync(venvPath)) {
+    log('Première exécution - Configuration de l\'environnement...');
+    log('Création du virtualenv...');
+    try {
+      execSync(`${python} -m venv "${venvPath}"`, { stdio: 'inherit' });
+    } catch (err) {
+      console.error(`${colors.red}Erreur:${colors.reset} Impossible de créer le virtualenv`);
+      process.exit(1);
+    }
+  }
+
+  const pip = getPipPath();
+  
+  // Upgrade pip
+  try {
+    execSync(`"${pip}" install --upgrade pip`, { stdio: 'pipe' });
+  } catch {
+    // Ignore errors
+  }
+
+  // Install mailaka
+  log('Installation des dépendances...');
+  try {
+    execSync(`"${pip}" install -e "${baseDir}"`, { stdio: 'inherit' });
+    log('Installation terminée!', 'green');
+  } catch (err) {
+    console.error(`${colors.red}Erreur:${colors.reset} Échec de l'installation`);
+    process.exit(1);
+  }
+}
+
+function runMailaka() {
+  const mailaka = getMailakaPath();
+  const args = process.argv.slice(2);
+  
+  // Check if venv exists and mailaka is installed
+  if (!fs.existsSync(mailaka)) {
+    setupVenv();
+  }
+
+  // Run mailaka
+  const proc = spawn(mailaka, args, { stdio: 'inherit' });
   proc.on('error', (err) => {
-    console.error('Erreur: Mailaka n\'est pas installé.');
-    console.error('Veuillez installer avec: pip install mailaka');
+    console.error(`${colors.red}Erreur:${colors.reset} ${err.message}`);
     process.exit(1);
   });
+  proc.on('exit', (code) => {
+    process.exit(code || 0);
+  });
 }
+
+runMailaka();

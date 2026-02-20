@@ -2,12 +2,10 @@
   "name": "mailaka",
   "version": "1.0.0",
   "description": "Generateur d'emails ephemeres en ligne de commande",
-  "main": "index.js",
   "bin": {
     "mailaka": "./bin/mailaka"
   },
   "scripts": {
-    "postinstall": "node scripts/install.js",
     "test": "echo 'Tests in Python - see pyproject.toml'"
   },
   "keywords": [
@@ -29,7 +27,8 @@
   },
   "files": [
     "bin/",
-    "scripts/",
+    "mailaka/",
+    "pyproject.toml",
     "README.md",
     "LICENSE"
   ],
