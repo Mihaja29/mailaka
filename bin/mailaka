@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * Mailaka Auto-Fix Wrapper
- * Detecte et corrige automatiquement les problemes d'installation
+ * Mailaka Auto-Setup Wrapper
+ * Installe automatiquement les dependances au premier lancement
  */
 
 const { spawn, execSync } = require('child_process');
@@ -14,6 +14,7 @@ const colors = {
   green: '\x1b[32m',
   blue: '\x1b[34m',
   yellow: '\x1b[33m',
+  dim: '\x1b[2m',
   reset: '\x1b[0m'
 };
 
@@ -33,10 +34,18 @@ function success(msg) {
   console.log(`${colors.green}✔${colors.reset} ${msg}`);
 }
 
+function info(msg) {
+  console.log(`${colors.dim}  ${msg}${colors.reset}`);
+}
+
 // Detection
 function getInstallPath() {
-  const npmGlobal = execSync('npm root -g', { encoding: 'utf8' }).trim();
-  return path.join(npmGlobal, 'mailaka');
+  try {
+    const npmGlobal = execSync('npm root -g', { encoding: 'utf8' }).trim();
+    return path.join(npmGlobal, 'mailaka');
+  } catch {
+    return path.dirname(path.dirname(__filename));
+  }
 }
 
 function checkPython() {
@@ -65,115 +74,72 @@ function checkMailakaInstalled(venvPath) {
   return fs.existsSync(mailakaPath);
 }
 
-// Fixes
-function fixPythonMissing() {
-  error('Python 3.8+ est requis mais non trouvé.');
-  console.log('\nInstallation de Python :');
-  console.log('  Ubuntu/Debian:  sudo apt install python3 python3-pip python3-venv');
-  console.log('  macOS:          brew install python3');
-  console.log('  Windows:        https://python.org/downloads\n');
-  return false;
-}
-
-function fixVenv(baseDir, python) {
-  log('Creation du virtualenv...');
-  try {
-    execSync(`${python.cmd} -m venv "${path.join(baseDir, 'venv')}"`, { 
-      stdio: 'inherit',
-      cwd: baseDir
-    });
-    success('Virtualenv créé');
-    return true;
-  } catch (err) {
-    error('Échec de la création du virtualenv');
-    return false;
-  }
-}
-
-function fixMailakaInstall(baseDir, venvPath) {
-  log('Installation de Mailaka...');
-  const pip = os.platform() === 'win32'
-    ? path.join(venvPath, 'Scripts', 'pip.exe')
-    : path.join(venvPath, 'bin', 'pip');
-  
-  try {
-    execSync(`"${pip}" install -e "${baseDir}"`, { stdio: 'inherit' });
-    success('Mailaka installé');
-    return true;
-  } catch (err) {
-    error('Échec de l\'installation');
-    return false;
-  }
-}
-
-function fixPermissions(venvPath) {
-  if (os.platform() === 'win32') return true;
-  
-  try {
-    const binPath = path.join(venvPath, 'bin');
-    fs.chmodSync(binPath, 0o755);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-// Main
-function runWithAutoFix() {
+// Auto-setup
+function setupEnvironment() {
   console.log(`${colors.blue}═══════════════════════════════════════════════════${colors.reset}`);
-  console.log(`${colors.blue}  Mailaka - Diagnostic et correction automatique${colors.reset}`);
+  console.log(`${colors.blue}  Mailaka - Premiere configuration${colors.reset}`);
   console.log(`${colors.blue}═══════════════════════════════════════════════════${colors.reset}\n`);
   
   // 1. Verifier Python
   const python = checkPython();
   if (!python) {
-    return fixPythonMissing();
+    error('Python 3.8+ est requis mais non trouvé.');
+    console.log('\nInstallation de Python :');
+    console.log('  Ubuntu/Debian:  sudo apt install python3 python3-pip python3-venv');
+    console.log('  macOS:          brew install python3');
+    console.log('  Windows:        https://python.org/downloads\n');
+    process.exit(1);
   }
-  log(`Python trouvé: ${python.version}`);
+  log(`Python detecte: ${python.version}`);
   
-  // 2. Obtenir le chemin d'installation
-  let baseDir;
-  try {
-    baseDir = getInstallPath();
-    log(`Chemin d'installation: ${baseDir}`);
-  } catch (err) {
-    // Fallback: utiliser le répertoire parent du script
-    baseDir = path.dirname(path.dirname(__filename));
-    warn(`Chemin npm non détecté, utilisation de: ${baseDir}`);
-  }
+  // 2. Chemin d'installation
+  const baseDir = getInstallPath();
+  log(`Installation dans: ${baseDir}`);
   
   if (!fs.existsSync(baseDir)) {
-    error(`Répertoire d'installation introuvable: ${baseDir}`);
-    return false;
+    error(`Repertoire introuvable: ${baseDir}`);
+    process.exit(1);
   }
   
-  // 3. Verifier/Creer virtualenv
-  const venv = checkVenv(baseDir);
-  if (!venv.exists) {
-    log('Virtualenv manquant');
-    if (!fixVenv(baseDir, python)) return false;
-  } else {
-    success('Virtualenv présent');
+  // 3. Creer virtualenv
+  const venvPath = path.join(baseDir, 'venv');
+  if (!checkVenv(baseDir).exists) {
+    log('Creation de l\'environnement Python...');
+    info('Cela peut prendre quelques secondes...');
+    try {
+      execSync(`${python.cmd} -m venv "${venvPath}"`, { stdio: 'pipe' });
+      success('Environnement cree');
+    } catch (err) {
+      error('Echec de la creation de l\'environnement');
+      process.exit(1);
+    }
   }
   
-  // 4. Verifier/Corriger permissions
-  fixPermissions(venv.path);
-  
-  // 5. Verifier/Installer Mailaka
-  if (!checkMailakaInstalled(venv.path)) {
-    log('Mailaka n\'est pas installé dans le virtualenv');
-    if (!fixMailakaInstall(baseDir, venv.path)) return false;
-  } else {
-    success('Mailaka installé');
+  // 4. Installer Mailaka
+  if (!checkMailakaInstalled(venvPath)) {
+    log('Installation des dependances...');
+    info('Telechargement et installation de Mailaka...');
+    const pip = os.platform() === 'win32'
+      ? path.join(venvPath, 'Scripts', 'pip.exe')
+      : path.join(venvPath, 'bin', 'pip');
+    
+    try {
+      execSync(`"${pip}" install -e "${baseDir}"`, { stdio: 'inherit' });
+      success('Mailaka installe avec succes');
+    } catch (err) {
+      error('Echec de l\'installation');
+      process.exit(1);
+    }
   }
   
   console.log(`\n${colors.green}═══════════════════════════════════════════════════${colors.reset}`);
-  console.log(`${colors.green}  Correction terminée! Redémarrage...${colors.reset}`);
+  console.log(`${colors.green}  Configuration terminee!${colors.reset}`);
   console.log(`${colors.green}═══════════════════════════════════════════════════${colors.reset}\n`);
   
-  return true;
+  return { baseDir, venvPath };
 }
 
+// Run
 function runMailaka() {
   const baseDir = getInstallPath();
   const venvPath = path.join(baseDir, 'venv');
@@ -182,15 +148,21 @@ function runMailaka() {
     : path.join(venvPath, 'bin', 'mailaka');
   
   const args = process.argv.slice(2);
+  
+  // Check if first run - auto setup
+  if (!fs.existsSync(mailakaPath)) {
+    setupEnvironment();
+  }
+  
+  // Run mailaka
   const proc = spawn(mailakaPath, args, { stdio: 'inherit' });
   
   proc.on('error', (err) => {
     if (err.code === 'ENOENT') {
-      error('Mailaka introuvable, tentative de correction...');
-      if (runWithAutoFix()) {
-        console.log('\nRelance de mailaka...\n');
-        runMailaka();
-      }
+      warn('Mailaka non trouve, tentative de reparation...');
+      setupEnvironment();
+      console.log('\nRelance...\n');
+      runMailaka();
     } else {
       error(`Erreur: ${err.message}`);
       process.exit(1);
@@ -198,16 +170,12 @@ function runMailaka() {
   });
   
   proc.on('exit', (code) => {
-    if (code && code !== 0) {
-      // Erreur de sortie du programme - tenter auto-fix
-      if (code === 127 || code === 9009) { // command not found
-        warn('Mailaka semble avoir un probleme, correction...');
-        if (runWithAutoFix()) {
-          console.log('\nRelance de mailaka...\n');
-          runMailaka();
-          return;
-        }
-      }
+    if (code && code !== 0 && (code === 127 || code === 9009)) {
+      warn('Probleme detecte, reparation automatique...');
+      setupEnvironment();
+      console.log('\nRelance...\n');
+      runMailaka();
+      return;
     }
     process.exit(code || 0);
   });
@@ -215,7 +183,7 @@ function runMailaka() {
 
 // Check if running diagnostics only
 if (process.argv.includes('--fix') || process.argv.includes('--repair')) {
-  runWithAutoFix();
+  setupEnvironment();
 } else {
   runMailaka();
 }

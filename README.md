@@ -49,18 +49,33 @@ pip install mailaka
 
 ### Via npm / pnpm (depuis GitHub)
 
+**Installation automatique au premier lancement**
+
 ```bash
-# Avec npm
+# Installation
 npm install -g Mihaja29/mailaka
 
-# Avec pnpm (plus rapide, moins d'espace disque)
-pnpm install -g Mihaja29/mailaka
+# Premier lancement - installation automatique des dependances
+mailaka --help
+# → Detection de Python...
+# → Creation de l'environnement...
+# → Installation de Mailaka...
+# → Termine!
 
-# Ou avec npx (sans installation globale)
-npx Mihaja29/mailaka
+# Desormais mailaka fonctionne directement
+mailaka
 ```
 
-**Note:** Le paquet n'est pas encore publié sur npm registry. L'installation se fait directement depuis GitHub.
+**Avec pnpm (plus rapide, moins d'espace disque)**
+```bash
+pnpm install -g Mihaja29/mailaka
+mailaka
+```
+
+**Avec npx (sans installation globale)**
+```bash
+npx Mihaja29/mailaka
+```
 
 ### Via Git
 
