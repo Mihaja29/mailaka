@@ -1,0 +1,27 @@
+# Binary
+bin/
+mailaka
+*.exe
+
+# Test
+*.test
+*.out
+coverage.html
+coverage.out
+
+# Go
+vendor/
+go.sum
+
+# Config local
+.config/
+.config.mailaka/
+.data/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
